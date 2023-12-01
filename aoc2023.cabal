@@ -31,10 +31,11 @@ library
 executable aoc2023
     import:           warnings
     main-is:          Main.hs
-    -- other-modules:
+    other-modules:    Temp
     -- other-extensions:
     build-depends:
         base ^>=4.17.2.0,
+        template-haskell,
         aoc2023
 
     hs-source-dirs:   app
