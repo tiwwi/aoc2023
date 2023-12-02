@@ -1,5 +1,5 @@
 module Day16 (solveFrom) where
 
 solveFrom :: FilePath -> IO (String, String)
-solveFrom = undefined
+solveFrom = const $ return ("TODO", "TODO")
 

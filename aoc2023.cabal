@@ -24,18 +24,18 @@ library
                       Day21, Day22, Day23, Day24, Day25
     -- other-modules:
     -- other-extensions:
-    build-depends:    base ^>=4.17.2.0
+    build-depends:    base ^>=4.17.2.0,
+                      text,
     hs-source-dirs:   src
     default-language: GHC2021
 
 executable aoc2023
     import:           warnings
     main-is:          Main.hs
-    other-modules:    Temp
     -- other-extensions:
     build-depends:
         base ^>=4.17.2.0,
-        template-haskell,
+        time,
         aoc2023
 
     hs-source-dirs:   app
