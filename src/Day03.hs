@@ -4,11 +4,19 @@ import Data.Array.IArray
 import Data.Char (digitToInt, isDigit)
 import Data.Text qualified as T
 import Data.Text.IO qualified as T
-import Debug.Trace
+import Data.Maybe (mapMaybe)
+import Data.List (nub)
+import Control.Monad (guard)
 import Helpers (decimalToInt)
+import qualified Data.Set as S
 
 data Field = Symbol Char | Number Int | Empty deriving (Show, Eq)
 data NumPos = NumPos Int Int Int deriving(Show)
+
+instance Eq NumPos where
+    NumPos x1 y1 _ == NumPos x2 y2 _ = x1 == x2 && y1 == y2
+instance Ord NumPos where
+    NumPos x1 y1 _ <= NumPos x2 y2 _ = x1 < x2 || x1 == x2 && y1 <= y2
 
 type Pos = (Int, Int)
 type Schematic = Array Pos Field
@@ -17,9 +25,9 @@ solveFrom :: FilePath -> IO (String, String)
 solveFrom = fmap solve . T.readFile
 
 solve :: T.Text -> (String, String)
-solve txt = (show $ part1 schema, show $ part2 schema)
+solve txt = (show $ part1 schema numbers, show $ part2 schema numbers)
     where schema = parseSchematic txt
-
+          numbers = getNumbers schema
 
 charToField :: Char -> Field
 charToField '.' = Empty
@@ -34,12 +42,6 @@ parseSchematic txt = listArray bds $ (lns >>= map charToField . T.unpack)
     nCols = T.length $ head lns
     nRows = length lns
     bds = ((1, 1), (nRows, nCols))
-
-testParse :: IO ()
-testParse = do
-  txt <- T.readFile "inputs/ex03.in"
-  print txt
-  print $ getNumbers $ parseSchematic txt
 
 isNumber :: Field -> Bool
 isNumber (Number _) = True
@@ -67,10 +69,25 @@ toInt schema (NumPos x yl yr) = decimalToInt [ fromDigit $ schema ! (x, y) | y <
     where fromDigit (Number n) = n
           fromDigit _ = error "Invalid Number Position!"
 
-part1 :: Schematic -> Int
-part1 schema = sum $ map (toInt schema) $ filter (isAdjacent schema) numbers
-    where numbers = getNumbers schema
+isContained :: Pos -> NumPos -> Bool
+isContained (x,y) (NumPos xn yl yr) = x == xn && yl <= y && y <= yr
 
-part2 :: Schematic -> Int
-part2 _ = -1
+part1 :: Schematic -> [NumPos] -> Int
+part1 schema numbers = sum $ map (toInt schema) $ filter (isAdjacent schema) numbers
+
+part2 :: Schematic -> [NumPos] -> Int
+part2 schema numbers = sum $ map starScore $ stars
+    where isStar (Symbol '*') = True
+          isStar _ = False
+          numberSet = S.fromList numbers
+          stars = [ idx | (idx, f) <- assocs schema, isStar f ]
+          neighbours (x,y) = tail [(x', y') | x' <- [x, x-1, x+1], y' <- [y, y-1, y+1]]
+          checkAndGet (x,y) = do
+              num <- S.lookupLE (NumPos x y y) numberSet
+              guard $ isContained (x,y) num
+              return num
+          starScore (x,y) = let candidates = nub $ mapMaybe checkAndGet $ neighbours (x,y)
+                             in if length candidates == 2
+                                then product $ toInt schema <$> candidates 
+                                else 0
 
