@@ -4,6 +4,8 @@ import Control.Monad ((>=>))
 import System.Environment (getArgs)
 import Text.Printf (printf)
 import Data.Time.Clock
+import System.CPUTime
+import Control.DeepSeq (deepseq)
 
 import qualified Day01 (solveFrom)
 import qualified Day02 (solveFrom)
@@ -70,6 +72,7 @@ runDay :: Int -> IO String
 runDay n = do
     start <- getCurrentTime
     result <- solveDay n
+    deepseq result $ return () 
     end <- getCurrentTime
     let timeDelta = diffUTCTime end start
     return $ displayDay n timeDelta result
