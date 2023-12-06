@@ -4,7 +4,6 @@ import Control.Monad ((>=>))
 import System.Environment (getArgs)
 import Text.Printf (printf)
 import Data.Time.Clock
-import System.CPUTime
 import Control.DeepSeq (deepseq)
 
 import qualified Day01 (solveFrom)

@@ -38,16 +38,14 @@ shrinkCard (Card idx win mine) = TinyCard idx nWins
 
 part1 :: Bingo -> Int
 part1 = sum . map (toPoints . wins) 
-    where toPoints 0 = 0
-          toPoints n = 2^(n-1)
+    where toPoints n = 2^n `div` 2
 
 part2 :: Bingo -> Int
 part2 bingo = V.sum $ foldl go cardTracker bingo
-    where nCards = length bingo
-          cardTracker = V.replicate nCards 1
+    where cardTracker = V.replicate (length bingo) 1
           go track card = V.modify (addCards card) track
           addCards (TinyCard idx wins) v = do
               n <- MV.read v (idx - 1)
               let lastIdx = min wins (MV.length v - idx) - 1
-              mapM_ (MV.modify v (+n) . (+idx)) [0..lastIdx]
+              mapM_ (MV.modify v (+n)) [idx .. idx + lastIdx]
 

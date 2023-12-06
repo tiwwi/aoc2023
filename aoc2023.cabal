@@ -16,6 +16,7 @@ library
         Day16, Day17, Day18, Day19, Day20,
         Day21, Day22, Day23, Day24, Day25,
 
+    other-modules: Helpers
     hs-source-dirs:   src
     default-language: GHC2021
     ghc-options:      -Wall
@@ -46,4 +47,5 @@ test-suite aoc2023-test
     ghc-options:      -Wall
     build-depends:
         base,
-        aoc2023
+        aoc2023,
+        HUnit

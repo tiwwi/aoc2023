@@ -8,7 +8,6 @@ import Data.Attoparsec.Text as A
 import Data.Char (isSpace)
 import Control.Monad (guard)
 import Data.Maybe
-import Debug.Trace
 
 data AgriBlock = AgriBlock {dest::Int, source::Int, range::Int} deriving(Show)
 type AgriMap = M.Map Int AgriBlock
@@ -31,7 +30,7 @@ seedP = string "seeds: " *> (decimal `sepBy1` space)
 
 mapP :: Parser AgriMap
 mapP = toMap <$> 
-    (skipWhile (not . isSpace) *> (string " map:") *> endOfLine *> (blockP `sepBy1` endOfLine))
+    (skipWhile (not . isSpace) *> string " map:" *> endOfLine *> (blockP `sepBy1` endOfLine))
     where toMap blocks = M.fromList $ zip (source <$> blocks) blocks
 
 blockP :: Parser AgriBlock
@@ -41,7 +40,7 @@ blockP = do
 
 throughMap :: Int -> AgriMap -> Int
 throughMap n mp = fromMaybe n $ do
-    (_, AgriBlock dest source range) <- M.lookupLE n mp
+    AgriBlock dest source range <- snd <$> M.lookupLE n mp
     guard $ n < (source + range)
     return $ n - source + dest
 
@@ -54,6 +53,7 @@ part1 maps seeds = minimum $ map (throughMaps maps) seeds
 part2 :: [AgriMap] -> Seeds -> Int
 part2 maps seeds = part1 maps newSeeds
     where tupleChunks [] = []
+          tupleChunks [_] = error "Seeds list has odd size!"
           tupleChunks (x:y:xs) = (x,y):tupleChunks xs
           toRange (x,y) = [x .. x+y-1]
           newSeeds = tupleChunks seeds >>= toRange

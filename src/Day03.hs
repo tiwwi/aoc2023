@@ -36,7 +36,7 @@ charToField c
   | otherwise = Symbol c
 
 parseSchematic :: T.Text -> Schematic
-parseSchematic txt = listArray bds $ (lns >>= map charToField . T.unpack)
+parseSchematic txt = listArray bds $ lns >>= map charToField . T.unpack
   where
     lns = T.lines txt
     nCols = T.length $ head lns
@@ -76,7 +76,7 @@ part1 :: Schematic -> [NumPos] -> Int
 part1 schema numbers = sum $ map (toInt schema) $ filter (isAdjacent schema) numbers
 
 part2 :: Schematic -> [NumPos] -> Int
-part2 schema numbers = sum $ map starScore $ stars
+part2 schema numbers = sum $ map starScore stars
     where isStar (Symbol '*') = True
           isStar _ = False
           numberSet = S.fromList numbers

@@ -1,4 +1,32 @@
 module Main (main) where
 
+import System.Exit (exitFailure)
+
+import Day01 (solveFrom)
+import Day02 (solveFrom)
+import Day03 (solveFrom)
+import Day04 (solveFrom)
+import Day05 (solveFrom)
+import Day06 (solveFrom)
+import Day07 (solveFrom)
+import Day08 (solveFrom)
+import Day09 (solveFrom)
+import Day10 (solveFrom)
+import Day11 (solveFrom)
+import Day12 (solveFrom)
+import Day13 (solveFrom)
+import Day14 (solveFrom)
+import Day15 (solveFrom)
+import Day16 (solveFrom)
+import Day17 (solveFrom)
+import Day18 (solveFrom)
+import Day19 (solveFrom)
+import Day20 (solveFrom)
+import Day21 (solveFrom)
+import Day22 (solveFrom)
+import Day23 (solveFrom)
+import Day24 (solveFrom)
+import Day25 (solveFrom)
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented."
+main = putStrLn "This test always fails!" >> exitFailure
