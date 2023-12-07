@@ -3,16 +3,16 @@ module Day07 (solveFrom) where
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Data.Attoparsec.Text as A
+import Data.Function (on)
 import Helpers (quickParseT)
 import Data.List (sort, sortOn, group)
+import Data.Char
 
 
-data Card = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | J | Q | K | A  deriving (Show, Eq, Ord)
+data Card = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King | Ace  deriving (Show, Eq, Ord, Enum)
 newtype JCard = JCard Card deriving (Show, Eq)
 
-
 data Hand = Hand {cards::[Card], bid::Int} deriving (Show)
-
 data NormalHand = NormalHand HandType [Card] deriving (Eq, Ord)
 data JokerHand = JokerHand HandType [JCard] deriving (Eq, Ord)
 
@@ -28,21 +28,14 @@ solve txt = (show $ part1 hands, show $ part2 hands)
 
 -- Parsing
 charToCard :: Char -> Card
-charToCard card = case card of
-                    '2' -> Two
-                    '3' -> Three
-                    '4' -> Four
-                    '5' -> Five
-                    '6' -> Six
-                    '7' -> Seven
-                    '8' -> Eight
-                    '9' -> Nine
-                    'A' -> A
-                    'K' -> K
-                    'J' -> J
-                    'Q' -> Q
-                    'T' -> Ten
-                    _   -> error "Invalid card!"
+charToCard 'T' = Ten
+charToCard 'A' = Ace
+charToCard 'K' = King
+charToCard 'J' = Jack
+charToCard 'Q' = Queen
+charToCard card 
+    | isDigit card && card /= '1' = toEnum (digitToInt card - 2)
+    | otherwise = error "Invalid card!"
 
 cardChars :: [Char]
 cardChars = "23456789AKJQT"
@@ -58,11 +51,9 @@ cardP = charToCard <$> satisfy (inClass cardChars)
 
 -- Specifics
 instance Ord JCard where
-    compare (JCard c1) (JCard c2) = case (c1, c2) of
-                    (J, J) -> EQ
-                    (J, _) -> LT
-                    (_, J) -> GT
-                    (x, y) -> compare x y
+    compare (JCard c1) (JCard c2) = (compare `on` fromJester) c1 c2
+        where fromJester Jack = -1
+              fromJester x = fromEnum x
 
 toNormalHand :: Hand -> NormalHand
 toNormalHand (Hand cards _) = NormalHand (getNormalType cards) cards
@@ -77,7 +68,7 @@ getJokerType :: [Card] -> HandType
 getJokerType cards = case getNormalType noJokers of
                         (x:xs) -> (x+numJokers):xs
                         [] -> [5]
-    where noJokers = filter (/= J) cards
+    where noJokers = filter (/= Jack) cards
           numJokers = 5 - length noJokers
 
 
