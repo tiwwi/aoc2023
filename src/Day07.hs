@@ -3,11 +3,10 @@ module Day07 (solveFrom) where
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Data.Attoparsec.Text as A
-import Data.Function (on)
 import Helpers (quickParseT)
 import Data.List (sort, sortOn, group)
 import Data.Char
-
+import Data.Ord (comparing)
 
 data Card = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King | Ace  deriving (Show, Eq, Ord, Enum)
 newtype JCard = JCard Card deriving (Show, Eq)
@@ -51,7 +50,7 @@ cardP = charToCard <$> satisfy (inClass cardChars)
 
 -- Specifics
 instance Ord JCard where
-    compare (JCard c1) (JCard c2) = (compare `on` fromJester) c1 c2
+    compare (JCard c1) (JCard c2) = (comparing fromJester) c1 c2
         where fromJester Jack = -1
               fromJester x = fromEnum x
 
@@ -67,7 +66,7 @@ getNormalType = reverse . sort . map length . group . sort
 getJokerType :: [Card] -> HandType
 getJokerType cards = case getNormalType noJokers of
                         (x:xs) -> (x+numJokers):xs
-                        [] -> [5]
+                        [] -> [numJokers]
     where noJokers = filter (/= Jack) cards
           numJokers = 5 - length noJokers
 
