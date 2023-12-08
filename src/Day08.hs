@@ -8,7 +8,7 @@ import qualified Data.Map.Strict as M
 import Data.Char (isUpperCase)
 import Data.List (findIndex, scanl')
 import Control.Applicative((<|>))
-import Control.Monad (guard)
+import Control.Monad (mfilter)
 import Helpers
 
 
@@ -40,10 +40,7 @@ nodeP = Node <$> nameP
              <*> (string ", " *> nameP <* ")")
 
 nameP :: Parser Place
-nameP = do
-    s <- A.take 3
-    guard $ T.all isUpperCase s
-    return s
+nameP = mfilter (T.all isUpperCase) $ A.take 3
 
 getNext :: Dir -> Node -> Place
 getNext L = left

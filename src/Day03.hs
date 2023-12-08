@@ -6,7 +6,7 @@ import Data.Text qualified as T
 import Data.Text.IO qualified as T
 import Data.Maybe (mapMaybe)
 import Data.List (nub)
-import Control.Monad (guard)
+import Control.Monad (mfilter)
 import Helpers (decimalToInt)
 import qualified Data.Set as S
 
@@ -82,10 +82,7 @@ part2 schema numbers = sum $ map starScore stars
           numberSet = S.fromList numbers
           stars = [ idx | (idx, f) <- assocs schema, isStar f ]
           neighbours (x,y) = tail [(x', y') | x' <- [x, x-1, x+1], y' <- [y, y-1, y+1]]
-          checkAndGet (x,y) = do
-              num <- S.lookupLE (NumPos x y y) numberSet
-              guard $ isContained (x,y) num
-              return num
+          checkAndGet (x,y) = mfilter ((x,y) `isContained`) $ S.lookupLE (NumPos x y y) numberSet
           starScore (x,y) = let candidates = nub $ mapMaybe checkAndGet $ neighbours (x,y)
                              in if length candidates == 2
                                 then product $ toInt schema <$> candidates 

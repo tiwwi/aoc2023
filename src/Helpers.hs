@@ -1,9 +1,8 @@
-module Helpers (readT, readMaybeT, decimalToInt, quickParseT, failsIf) where
+module Helpers (readT, readMaybeT, decimalToInt, quickParseT) where
 
 import qualified Data.Text as T
 import qualified Data.Attoparsec.Text as T
 import Text.Read (readMaybe)
-import Control.Monad (MonadPlus, guard)
 
 readT :: Read a => T.Text -> a
 readT = read . T.unpack
@@ -19,9 +18,3 @@ quickParseT :: T.Parser a -> T.Text -> a
 quickParseT p txt = case T.parseOnly p txt of
                         Right a -> a
                         Left err -> error err
-
-failsIf :: MonadPlus m => m a -> (a -> Bool) -> m a
-failsIf m f = do
-    x <- m
-    guard $ f x
-    return x
