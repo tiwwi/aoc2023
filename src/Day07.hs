@@ -4,9 +4,9 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Data.Attoparsec.Text as A
 import Helpers (quickParseT)
-import Data.List (sort, sortOn, group)
+import Data.List (sort, sortOn, sortBy, group)
 import Data.Char
-import Data.Ord (comparing)
+import Data.Ord (comparing, Down(Down))
 
 data Card = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King | Ace  deriving (Show, Eq, Ord, Enum)
 newtype JCard = JCard Card deriving (Show, Eq)
@@ -43,14 +43,14 @@ handsP :: Parser [Hand]
 handsP = handP `sepBy` endOfLine
 
 handP :: Parser Hand
-handP = Hand <$> (count 5 cardP) <*> (space *> decimal)
+handP = Hand <$> count 5 cardP <*> (space *> decimal)
 
 cardP :: Parser Card
 cardP = charToCard <$> satisfy (inClass cardChars)
 
 -- Specifics
 instance Ord JCard where
-    compare (JCard c1) (JCard c2) = (comparing fromJester) c1 c2
+    compare (JCard c1) (JCard c2) = comparing fromJester c1 c2
         where fromJester Jack = -1
               fromJester x = fromEnum x
 
@@ -61,7 +61,7 @@ toJokerHand :: Hand -> JokerHand
 toJokerHand (Hand cards _) = JokerHand (getJokerType cards) (JCard <$> cards)
 
 getNormalType :: [Card] -> HandType
-getNormalType = reverse . sort . map length . group . sort
+getNormalType = sortBy (comparing Down) . map length . group . sort
 
 getJokerType :: [Card] -> HandType
 getJokerType cards = case getNormalType noJokers of

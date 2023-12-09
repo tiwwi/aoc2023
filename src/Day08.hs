@@ -28,7 +28,7 @@ solve txt = (show $ part1 path network, show $ part2 path network)
     where (path, network) = quickParseT networkP txt
 
 networkP :: Parser (Path, Network)
-networkP = (,) <$> (many1 dirP) <*> (skipSpace *> fmap toMap (nodeP `sepBy1` endOfLine))
+networkP = (,) <$> many1 dirP <*> (skipSpace *> fmap toMap (nodeP `sepBy1` endOfLine))
     where toMap = M.fromList . map (\node -> (name node, node))
 
 dirP :: Parser Dir

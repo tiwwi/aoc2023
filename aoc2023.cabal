@@ -27,6 +27,7 @@ library
         containers,
         attoparsec,
         vector,
+        utility-ht,
 
 executable aoc2023
     main-is:          Main.hs
