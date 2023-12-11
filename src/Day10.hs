@@ -76,15 +76,9 @@ getCycle maze = start:walk maze (start, firstPipe)
           firstPipe = head pipes
 
 
-depipeify :: [Offset] -> Char
-depipeify xs = case sort xs of
-                [V2 (-1) 0, V2 1 0] -> '|'
-                [V2 0 (-1), V2 0 1] -> '-'
-                [V2 0 (-1), V2 1 0] -> '7'
-                [V2 (-1) 0, V2 0 (-1)] -> 'J'
-                [V2 (-1) 0, V2 0 1] -> 'L'
-                [V2 0 1, V2 1 0] -> 'F'
-                _ -> error "I f'ed up!"
+depipeify :: [Offset] -> Maybe Char
+depipeify xs = lookup (sort xs) depipeTable
+    where depipeTable = mapMaybe (\x -> (,x) . sort <$> pipeify x) "|-LJ7F"
 
 part1 = (`div` 2) . length
 
@@ -93,7 +87,7 @@ part2 maze cyc = sum $ snd . rowValue <$> rowsTransformed
           rows = groupBy ((==) `on` (^. _x) . fst) (assocs maze)
           rowModify (pos, chr) = if (S.member pos cycleSet) then chr else '.'
           (start, pipes) = getStartPositions maze
-          newS = pure $ depipeify $ subtract start <$> pipes
+          newS = pure $ fromJust $ depipeify $ subtract start <$> pipes
 
           rowsTransformed = replaceAll toReplace . filter (not . (`elem` "-")) . replaceAll [("S", newS)] . map rowModify <$> rows
 
