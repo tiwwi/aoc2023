@@ -30,8 +30,8 @@ sparseify uni = SparseU nRows nCols (S.fromList . map fst . filter snd $ assocs 
     where (V2 _ _, V2 nRows nCols) = bounds uni
 
 setBetween :: Ord a => S.Set a -> (a, a) -> S.Set a
-setBetween set (lo, hi) = fst $ S.split hi above
-    where (_, above) = S.split lo set
+setBetween s (lo, hi) = fst $ S.split hi above
+    where (_, above) = S.split lo s
 
 part :: Int -> SparseU -> Int
 part n (SparseU nRows nCols values) = sum $ [expandDist a b | (a:bs) <- tails valueList, b <- bs]
@@ -40,8 +40,6 @@ part n (SparseU nRows nCols values) = sum $ [expandDist a b | (a:bs) <- tails va
           emptyCols = S.fromAscList [1..nCols] `S.difference` S.map (^. _y) values
           expandDist (V2 x1 y1) (V2 x2 y2) = bigX - smX + (n - 1)*neRows + bigY - smY + (n - 1)*neCols
               where (smX, bigX, smY, bigY) = (min x1 x2, max x1 x2, min y1 y2, max y1 y2)
-                    neRows = length expandRows
-                    neCols = length expandCols
-                    expandRows = S.toList $ setBetween emptyRows (smX, bigX)
-                    expandCols = S.toList $ setBetween emptyCols (smY, bigY)
+                    neRows = S.size $ setBetween emptyRows (smX, bigX)
+                    neCols = S.size $ setBetween emptyCols (smY, bigY)
 

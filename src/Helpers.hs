@@ -25,4 +25,4 @@ replaceAll :: (Eq a, Foldable t, Show a) => t ([a], [a]) -> [a] -> [a]
 replaceAll _ [] = []
 replaceAll patterns xs@(x:re) = maybe (x:replaceAll patterns re) replaceStart replacer
     where replacer = find ((`isPrefixOf` xs) . fst) patterns
-          replaceStart (from,to) = to ++ (replaceAll patterns $ drop (length from) xs)
+          replaceStart (from,to) = to ++ replaceAll patterns (drop (length from) xs)

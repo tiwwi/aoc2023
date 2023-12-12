@@ -59,10 +59,10 @@ walk maze (lst, cur)
     | here == 'S' = []
     |otherwise = cur:walk maze (cur, next)
         where here = maze ! cur
-              next = fromJust $ reachable maze cur >>= (find (/= lst))
+              next = fromJust $ reachable maze cur >>= find (/= lst)
 
 reachable :: Maze -> Pos -> Maybe [Pos]
-reachable maze pos = map (pos+) <$> (pipeify $ maze ! pos)
+reachable maze pos = map (pos+) <$> pipeify (maze ! pos)
 
 getStartPositions :: Maze -> (Pos, [Pos])
 getStartPositions maze = (start, pipes)
@@ -85,7 +85,7 @@ part1 = (`div` 2) . length
 part2 maze cyc = sum $ snd . rowValue <$> rowsTransformed
     where toReplace = [("FJ","|"), ("L7","|"), ("F7", ""), ("LJ", "")]
           rows = groupBy ((==) `on` (^. _x) . fst) (assocs maze)
-          rowModify (pos, chr) = if (S.member pos cycleSet) then chr else '.'
+          rowModify (pos, chr) = if S.member pos cycleSet then chr else '.'
           (start, pipes) = getStartPositions maze
           newS = pure $ fromJust $ depipeify $ subtract start <$> pipes
 
