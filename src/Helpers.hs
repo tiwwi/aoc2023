@@ -1,4 +1,4 @@
-module Helpers (readT, readMaybeT, decimalToInt, quickParseT, replaceAll) where
+module Helpers (readT, readMaybeT, decimalToInt, quickParseT, replaceAll, count) where
 
 import qualified Data.Text as T
 import qualified Data.Attoparsec.Text as T
@@ -26,3 +26,6 @@ replaceAll _ [] = []
 replaceAll patterns xs@(x:re) = maybe (x:replaceAll patterns re) replaceStart replacer
     where replacer = find ((`isPrefixOf` xs) . fst) patterns
           replaceStart (from,to) = to ++ replaceAll patterns (drop (length from) xs)
+
+count :: (a -> Bool) -> [a] -> Int
+count f = length . filter f
