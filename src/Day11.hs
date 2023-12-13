@@ -4,7 +4,7 @@ import Data.Array.IArray
 import qualified Data.Set as S
 import Data.List (tails)
 import Linear.V2
-import Control.Lens
+import Control.Lens ((^.))
 
 type Pos = V2 Int
 type Universe = Array Pos Bool
@@ -42,4 +42,3 @@ part n (SparseU nRows nCols values) = sum $ [expandDist a b | (a:bs) <- tails va
               where (smX, bigX, smY, bigY) = (min x1 x2, max x1 x2, min y1 y2, max y1 y2)
                     neRows = S.size $ setBetween emptyRows (smX, bigX)
                     neCols = S.size $ setBetween emptyCols (smY, bigY)
-

@@ -48,14 +48,14 @@ arrangementsDP record backup = resultsMap ! (0,0)
         numArr (i,j) 
             | V.null bupV = fromEnum $ V.all (/= On) recV
             | V.null recV = 0
-            | otherwise = leftValue + goodValue
+            | otherwise = skipValue + takeValue
             where recV = V.drop i recordV
                   bupV = V.drop j backupV
                   r = V.head recV
                   b = V.head bupV
-                  leftValue = if r /= On then resultsMap ! (i+1, j) else 0
-                  isGood = V.and $ V.zipWith matchS recV (V.replicate b On V.++ [Off])
-                  goodValue = if isGood then resultsMap ! ((i+b+1),j+1) else 0
+                  skipValue = if r /= On then resultsMap ! (i+1, j) else 0
+                  canTake = V.and $ V.zipWith matchS recV (V.replicate b On V.++ [Off])
+                  takeValue = if canTake then resultsMap ! ((i+b+1),j+1) else 0
 
 part1, part2 :: [(SpringRecord, SpringBackup)] -> Int
 part1 = sum . map (uncurry arrangementsDP . first (++ [Off]))
