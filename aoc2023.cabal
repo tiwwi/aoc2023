@@ -30,6 +30,7 @@ library
         utility-ht,
         linear,
         lens,
+        split,
 
 executable aoc2023
     main-is:          Main.hs

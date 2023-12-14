@@ -1,10 +1,21 @@
-module Helpers (readT, readMaybeT, decimalToInt, quickParseT, replaceAll, count) where
+module Helpers (
+    readT,
+    readMaybeT,
+    decimalToInt,
+    quickParseT,
+    replaceAll,
+    count,
+    readMatrix,
+    arrayRows,
+    arrayColumns,
+) where
 
 import qualified Data.Text as T
 import qualified Data.Attoparsec.Text as T
 import Data.List (isPrefixOf, find)
 import Text.Read (readMaybe)
-import Debug.Trace
+import Linear.V2 (V2(V2))
+import Data.Array.IArray
 
 readT :: Read a => T.Text -> a
 readT = read . T.unpack
@@ -26,6 +37,20 @@ replaceAll _ [] = []
 replaceAll patterns xs@(x:re) = maybe (x:replaceAll patterns re) replaceStart replacer
     where replacer = find ((`isPrefixOf` xs) . fst) patterns
           replaceStart (from,to) = to ++ replaceAll patterns (drop (length from) xs)
+
+readMatrix :: T.Text -> Array (V2 Int) Char
+readMatrix txt = listArray (V2 1 1, V2 nRows nCols) $ lns >>= T.unpack
+    where lns = T.lines txt
+          nRows = length $ lns
+          nCols = T.length $ head $ lns
+
+arrayColumns :: Array (V2 Int) a -> [[a]]
+arrayColumns arr = [ [ arr ! V2 i j | i <- [lox .. hix] ] | j <- [loy..hiy] ]
+    where (V2 lox loy, V2 hix hiy) = bounds arr
+
+arrayRows :: Array (V2 Int) a -> [[a]]
+arrayRows arr = [ [ arr ! V2 i j | j <- [loy .. hiy] ] | i <- [lox..hix] ]
+    where (V2 lox loy, V2 hix hiy) = bounds arr
 
 count :: (a -> Bool) -> [a] -> Int
 count f = length . filter f

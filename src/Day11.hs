@@ -5,25 +5,23 @@ import qualified Data.Set as S
 import Data.List (tails)
 import Linear.V2
 import Control.Lens ((^.))
+import qualified Data.Text as T
+import qualified Data.Text.IO as T
+import Helpers (readMatrix)
 
 type Pos = V2 Int
 type Universe = Array Pos Bool
 data SparseU = SparseU {nRows :: Int, nCols:: Int, values::S.Set Pos}
 
 solveFrom :: FilePath -> IO (String, String)
-solveFrom = fmap solve . readFile
+solveFrom = fmap solve . T.readFile
 
-solve :: String -> (String, String)
+solve :: T.Text -> (String, String)
 solve txt = (show $ part 2 universe, show $ part 1000000 universe)
     where universe = sparseify $ parseUniverse txt
 
-parseUniverse :: String -> Universe
-parseUniverse txt = listArray bds $ (=='#') <$> concat lns
-  where
-    lns = lines txt
-    nCols = length $ head lns
-    nRows = length lns
-    bds = (V2 1 1, V2 nRows nCols)
+parseUniverse :: T.Text -> Universe
+parseUniverse = fmap (=='#') . readMatrix
 
 sparseify :: Universe -> SparseU
 sparseify uni = SparseU nRows nCols (S.fromList . map fst . filter snd $ assocs uni)

@@ -7,6 +7,7 @@ import Control.Applicative ((<|>))
 import Linear.V2
 import Data.Array.IArray
 import Data.List (find)
+import Helpers (readMatrix)
 
 type Pos = V2 Int
 type Place = Array Pos Bool
@@ -19,10 +20,7 @@ solve txt = (show $ part1 values, show $ part2 values)
     where values = map parsePlace . T.splitOn "\n\n" $ txt
 
 parsePlace :: T.Text -> Place
-parsePlace txt = listArray (V2 1 1, V2 nRows nCols) $ fmap (=='#') $ lns >>= T.unpack
-    where lns = T.lines txt
-          nRows = length $ lns
-          nCols = T.length $ head $ lns
+parsePlace = fmap (=='#') . readMatrix
 
 mirColCmp :: Place -> Int -> [Bool]
 mirColCmp place n = zipWith (==) colsLeft colsRight
