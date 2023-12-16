@@ -6,7 +6,9 @@ import Data.Text.IO qualified as T
 import Data.Array.IArray
 import Control.Monad.Trans.State
 import Control.Monad.Trans.Reader
+import Control.Monad.Trans.Maybe
 import Control.Monad.Trans.Class
+import Control.Monad (guard, msum)
 import Linear.V2
 import Linear.Metric
 import Data.Set qualified as S
@@ -57,17 +59,17 @@ moveBeamSafe :: Beam -> Laby -> [Beam]
 moveBeamSafe beam laby = filter (inRange (bounds laby) . pos) nextBeams
     where nextBeams = moveBeam beam (laby ! pos beam)
 
-calcBeam :: Beam -> ReaderT Laby (State (S.Set Beam)) ()
+lift2 = lift . lift
+
+calcBeam :: Beam -> MaybeT (ReaderT Laby (State (S.Set Beam))) ()
 calcBeam beam = do
-    isVisited <- lift $ gets $ S.member beam
-    if isVisited
-        then return ()
-        else do
-            lift $ modify $ S.insert beam
-            nextBeams <- asks $ moveBeamSafe beam
-            mapM_ calcBeam $ nextBeams
+    isVisited <- lift2 $ gets $ S.member beam
+    guard (not isVisited)
+    lift2 $ modify $ S.insert beam
+    nextBeams <- lift $ asks $ moveBeamSafe beam
+    msum (calcBeam <$> nextBeams)
 
 part1 laby = S.size $ S.map pos results
-    where results = snd $ runState (runReaderT (calcBeam (Beam (V2 1 1) right)) laby) S.empty
+    where results = snd $ runState (runReaderT (runMaybeT (calcBeam (Beam (V2 1 1) right))) laby) S.empty
 part2 = const "TODO"
 
