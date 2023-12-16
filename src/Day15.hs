@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 module Day15 (solveFrom) where
 
 import qualified Data.Text as T
@@ -33,7 +32,7 @@ hash = fromIntegral . T.foldl' go 0
 
 parseOperation :: T.Text -> Operation
 parseOperation txt 
-    | T.elem '=' txt = uncurry Add $ read . T.unpack . T.tail <$> (T.break (=='=') txt)
+    | T.elem '=' txt = uncurry Add $ read . T.unpack . T.tail <$> T.break (=='=') txt
     | otherwise = Rem $ T.takeWhile (/='-') txt
 
 modifyBox :: Int -> (Box -> Box) -> BoxComputation s ()

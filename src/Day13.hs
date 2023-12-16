@@ -47,5 +47,5 @@ smudgeValue place = rowIndexV <|> colIndexV
           colIndexV = find ((==[False]) . filter not . mirColCmp place) [1..nCols - 1]
 
 part1, part2 :: [Place] -> Maybe Int
-part1 = fmap sum . sequence . map mirrorValue
-part2 = fmap sum . sequence . map smudgeValue
+part1 = fmap sum . mapM mirrorValue
+part2 = fmap sum . mapM smudgeValue

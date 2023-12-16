@@ -1,6 +1,6 @@
 module Day14 (solveFrom) where
 
-import Data.List (intercalate, partition, transpose, findIndex)
+import Data.List (intercalate, partition, transpose, findIndex, elemIndex)
 import Data.List.Split (splitOn)
 import Data.Maybe
 
@@ -42,14 +42,14 @@ shiftNorth :: Rocks -> Rocks
 shiftNorth = map shiftColumn
 
 secondInf :: [a] -> [a]
-secondInf xs = take 1 xs ++ (secondInf $ drop 2 xs)
+secondInf xs = take 1 xs ++ secondInf (drop 2 xs)
 
 rockScore, part1, part2 :: Rocks -> Int
 rockScore = sum . map columnScore
 part1 = rockScore . shiftNorth
 part2 rocks = rockScore $ remaining !! ((1000000000 - cycleStart) `mod` cycleLength)
-    where cycleLength = 1 + (fromJust $ findIndex (== head remaining) (tail remaining))
+    where cycleLength = 1 + fromJust (elemIndex (head remaining) (tail remaining))
           cycleStep = foldr1 (.) $ replicate 4 (rotateClockwise . shiftNorth)
           (tort, hare) = (iterate cycleStep rocks, secondInf tort)
           remaining = drop cycleStart tort
-          cycleStart = 1 + (fromJust $ findIndex (uncurry (==)) $ tail $ zip tort hare)
+          cycleStart = 1 + fromJust (findIndex (uncurry (==)) $ tail $ zip tort hare)

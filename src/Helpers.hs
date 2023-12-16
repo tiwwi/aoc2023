@@ -41,8 +41,8 @@ replaceAll patterns xs@(x:re) = maybe (x:replaceAll patterns re) replaceStart re
 readMatrix :: T.Text -> Array (V2 Int) Char
 readMatrix txt = listArray (V2 1 1, V2 nRows nCols) $ lns >>= T.unpack
     where lns = T.lines txt
-          nRows = length $ lns
-          nCols = T.length $ head $ lns
+          nRows = length lns
+          nCols = T.length $ head lns
 
 arrayColumns :: Array (V2 Int) a -> [[a]]
 arrayColumns arr = [ [ arr ! V2 i j | i <- [lox .. hix] ] | j <- [loy..hiy] ]

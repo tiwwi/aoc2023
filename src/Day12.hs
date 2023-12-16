@@ -55,8 +55,8 @@ arrangementsDP record backup = resultsMap ! (0,0)
                   b = V.head bupV
                   skipValue = if r /= On then resultsMap ! (i+1, j) else 0
                   canTake = V.and $ V.zipWith matchS recV (V.replicate b On V.++ [Off])
-                  takeValue = if canTake then resultsMap ! ((i+b+1),j+1) else 0
+                  takeValue = if canTake then resultsMap ! (i+b+1,j+1) else 0
 
 part1, part2 :: [(SpringRecord, SpringBackup)] -> Int
 part1 = sum . map (uncurry arrangementsDP . first (++ [Off]))
-part2 = part1 . (map $ bimap (intercalate [Any] . replicate 5) (concat . replicate 5))
+part2 = part1 . map (bimap (intercalate [Any] . replicate 5) (concat . replicate 5))
