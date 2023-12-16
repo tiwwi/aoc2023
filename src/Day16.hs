@@ -12,7 +12,6 @@ import Control.Monad (guard, msum)
 import Linear.V2
 import Linear.Metric
 import Data.Set qualified as S
-import Debug.Trace
 
 type Laby = Array (V2 Int) Tile
 data Beam = Beam {pos::V2 Int, dir::V2 Int} deriving (Show, Eq, Ord)
@@ -22,7 +21,7 @@ solveFrom :: FilePath -> IO (String, String)
 solveFrom = fmap solve . T.readFile
 
 solve :: T.Text -> (String, String)
-solve txt = (show $ part1 mirrors, show $ part2 mirrors)
+solve txt = (show $ part1 mirrors (Beam (V2 1 1) right), show $ part2 mirrors)
     where mirrors = charToTile <$> readMatrix txt :: Laby
 
 charToTile :: Char -> Tile
@@ -60,7 +59,6 @@ moveBeamSafe beam laby = filter (inRange (bounds laby) . pos) nextBeams
     where nextBeams = moveBeam beam (laby ! pos beam)
 
 lift2 = lift . lift
-
 calcBeam :: Beam -> MaybeT (ReaderT Laby (State (S.Set Beam))) ()
 calcBeam beam = do
     isVisited <- lift2 $ gets $ S.member beam
@@ -69,7 +67,14 @@ calcBeam beam = do
     nextBeams <- lift $ asks $ moveBeamSafe beam
     msum (calcBeam <$> nextBeams)
 
-part1 laby = S.size $ S.map pos results
-    where results = snd $ runState (runReaderT (runMaybeT (calcBeam (Beam (V2 1 1) right))) laby) S.empty
-part2 = const "TODO"
+part1 :: Laby -> Beam -> Int
+part1 laby start = S.size $ S.map pos results
+    where results = snd $ runState (runReaderT (runMaybeT (calcBeam start)) laby) S.empty
+part2 :: Laby -> Int
+part2 laby = maximum $ part1 laby <$> startBeams
+      where (_, V2 nRows nCols) = bounds laby
+            startBeams = [Beam (V2 1 j) down | j <- [1..nCols]]
+                         ++ [Beam (V2 nRows j) up | j <- [1..nCols]]
+                         ++ [Beam (V2 i 1) right | i <- [1..nRows]]
+                         ++ [Beam (V2 i nCols) left | i <- [1..nRows]]
 
