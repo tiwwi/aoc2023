@@ -32,6 +32,7 @@ library
         lens,
         split,
         transformers,
+        pqueue,
 
 executable aoc2023
     main-is:          Main.hs
