@@ -33,6 +33,7 @@ library
         split,
         transformers,
         pqueue,
+        mtl,
 
 executable aoc2023
     main-is:          Main.hs
@@ -47,11 +48,14 @@ executable aoc2023
 
 test-suite aoc2023-test
     type:             exitcode-stdio-1.0
-    main-is:          Main.hs
+    main-is:          Tests.hs
     hs-source-dirs:   test
     default-language: GHC2021
     ghc-options:      -Wall
     build-depends:
         base,
         aoc2023,
-        HUnit
+        tasty,
+        tasty-hunit,
+        filepath,
+
