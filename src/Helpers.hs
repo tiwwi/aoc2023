@@ -8,6 +8,7 @@ module Helpers (
     readMatrix,
     arrayRows,
     arrayColumns,
+    takeUntil,
 ) where
 
 import qualified Data.Text as T
@@ -51,6 +52,12 @@ arrayColumns arr = [ [ arr ! V2 i j | i <- [lox .. hix] ] | j <- [loy..hiy] ]
 arrayRows :: Array (V2 Int) a -> [[a]]
 arrayRows arr = [ [ arr ! V2 i j | j <- [loy .. hiy] ] | i <- [lox..hix] ]
     where (V2 lox loy, V2 hix hiy) = bounds arr
+
+takeUntil :: (a -> Bool) -> [a] -> [a]
+takeUntil _ [] = []
+takeUntil f (x:xs)
+    | f x = [x]
+    | otherwise = x:takeUntil f xs
 
 count :: (a -> Bool) -> [a] -> Int
 count f = length . filter f
