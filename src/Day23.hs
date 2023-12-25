@@ -1,3 +1,4 @@
+{-# LANGUAGE MonadComprehensions #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 module Day23 (solveFrom) where
 
@@ -12,13 +13,18 @@ import Data.List (find)
 
 import qualified Data.Set as S
 import qualified Data.Map as M
-import Data.Graph
+
+import qualified Data.Vector as V
+
 import Data.Bifunctor
 import Control.Monad.State
-import Debug.Trace
+import Control.Monad (when)
 
 data FakeGraph = FNode Pos [(Int, FakeGraph)] | Goal Pos deriving(Show)
 data Field = Empty | Wall | Slope (V2 Int) deriving(Show, Eq)
+type Vertex = Int
+type Weight = Int
+type Graph = V.Vector (V.Vector (Weight, Vertex))
 type Pos = V2 Int
 type Laby = Array Pos Field
 
@@ -27,9 +33,10 @@ solveFrom :: FilePath -> IO (String, String)
 solveFrom = fmap solve . T.readFile
 
 solve :: T.Text -> (String, String)
-solve txt = (show $ part1 ezGraph, show $ part2 ezGraph)
+solve txt = (show $ part1 ezGraph, show $ part2 graph goal start)
     where laby = charToField <$> readMatrix txt
-          ezGraph = buildEzGraph laby
+          (ezGraph, startPos, goalPos) = buildEzGraph laby
+          (graph, start, goal) = mapGraphToVecGraph startPos goalPos $ collectGraph M.empty ezGraph
 
 
 up, down, left, right :: V2 Int
@@ -89,8 +96,8 @@ graphViaDfs laby goal cur
                             Just Empty -> True
                             _ -> False
 
-buildEzGraph :: Laby -> FakeGraph
-buildEzGraph laby = (execState (graphViaDfs laby goal start) M.empty) M.! start
+buildEzGraph :: Laby -> (FakeGraph, Pos, Pos)
+buildEzGraph laby = ((execState (graphViaDfs laby goal start) M.empty) M.! start, start, goal)
     where (_, V2 xhi yhi) = bounds laby
           start = fst $ fromJust $ find (\((V2 x y), field) -> field == Empty && x == 1) $ assocs laby
           goal = fst $ fromJust $ find (\((V2 x y), field) -> field == Empty && x == xhi) $ assocs laby
@@ -99,6 +106,40 @@ longestFakePath :: FakeGraph -> Int
 longestFakePath (Goal _ ) = 0
 longestFakePath (FNode _ below) = maximum $ [ len + longestFakePath node | (len, node) <- below ]
 
+collectGraph :: M.Map Pos [(Int, Pos)] -> FakeGraph -> M.Map Pos [(Int, Pos)]
+collectGraph mp (Goal pos) = M.insertWith (++) pos [] mp
+collectGraph mp (FNode pos below) = if M.notMember pos mp
+                                        then M.insertWith (++) pos [(i, getPos n) | (i,n) <- below] updatedNbs
+                                        else mp
+    where updatedNbs = foldl (\mp' (len, fake) -> M.insertWith (++) (getPos fake) [(len, pos)] (collectGraph mp' fake)) mp below
+          getPos (Goal p) = p
+          getPos (FNode p _) = p
+
+mapGraphToVecGraph :: Pos -> Pos -> M.Map Pos [(Int, Pos)] -> (Graph, Int, Int)
+mapGraphToVecGraph start goal mp = (V.fromList [ V.fromList [(len, asIndices M.! nb) | (len, nb) <- nbs] | (_, nbs) <- mpList],
+                                    asIndices M.! start,
+                                    asIndices M.! goal)
+    where mpList = M.toList mp
+          (_, asIndices) = M.mapAccum (\i _pos -> (i+1, i)) 0 mp
+
+longestPath :: Graph -> Int -> S.Set Vertex -> Vertex -> Int -> State Weight ()
+longestPath graph goal visited cur pathWeight
+    | cur == goal = modify (max pathWeight)
+    | not $ canReachGoal withCur cur = return ()
+    | otherwise = do
+        let potentialWeight = pathWeight + V.sum [ V.maximum $ V.cons 0 [ w | (w,j) <- edges, S.notMember j visited ] | (i,edges) <- V.indexed graph, S.notMember i withCur ]
+        currentMax <- get
+        when (potentialWeight > currentMax) $ 
+            V.sequence_ [ longestPath graph goal withCur next (pathWeight + weight) | (weight, next) <- (graph V.! cur), S.notMember next visited ]
+    where withCur = S.insert cur visited
+          neighbours v = graph V.! v
+
+          canReachGoal :: S.Set Vertex -> Vertex -> Bool
+          canReachGoal visited' vertex 
+              | vertex == goal = True
+              | otherwise = V.any (canReachGoal withVertex) $ [ next | (_, next) <- neighbours vertex, S.notMember next withVertex ]
+              where withVertex = S.insert vertex visited'
+          
 part1 = longestFakePath
-part2 = const 0
+part2 graph goal start = execState (longestPath graph goal S.empty start 0) (-1)
 

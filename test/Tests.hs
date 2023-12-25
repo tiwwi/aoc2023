@@ -78,7 +78,7 @@ dayTests 1 = [part1Test 1 "day01_ex1.in" "142", part2Test 1 "day01_ex2.in" "281"
 dayTests 20 = [part1Test 20 "day20_ex11.in" "32000000", part1Test 20 "day20_ex12.in" "11687500"]
 dayTests 21 = [part1Test 21 "day21_ex1.in" "16"]
 dayTests 22 = [part1Test 22 "day22_ex1.in" "5", part2Test 22 "day22_ex1.in" "7"]
-dayTests 23 = [part1Test 23 "day23_ex1.in" "94", part2Test 23 "day23_ex1.in" "7"]
+dayTests 23 = [part1Test 23 "day23_ex1.in" "94", part2Test 23 "day23_ex1.in" "154"]
 dayTests _ = error "Unknown Day!"
 
 partTest:: ((String, String) -> String) -> Int -> String -> String -> String -> TestTree
