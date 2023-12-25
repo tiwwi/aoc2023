@@ -2,8 +2,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Day22 (solveFrom) where
 
-import Debug.Trace
-
 import Linear.V2
 import Linear.V3
 
