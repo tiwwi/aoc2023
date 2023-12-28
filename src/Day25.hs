@@ -11,16 +11,21 @@ import qualified Data.Set as S
 import qualified Data.Map as M
 import Debug.Trace
 
+
 import Control.Monad
 import Control.Monad.State
 import Control.Monad.Reader
 import Control.Monad.ST
 import Control.Monad.Trans.Maybe
 
+import System.Random
+
+import Data.Foldable(toList)
+import Data.Bits (xor)
 import Data.Tuple (swap)
+import Data.List (unfoldr, find)
 import Data.Graph
 import Data.Array.Unboxed
-import Data.Array.IArray
 import Data.Array.ST
 
 type Name = T.Text
@@ -55,9 +60,9 @@ findM :: MonadPlus m => (a -> m Bool) -> [m a] -> m a
 findM f [] = mzero
 findM f (x:xs) = mzero
 
-fulkersonDFS :: Vertex -> Vertex -> StateT (S.Set Vertex) (MaybeT (ReaderT (Graph, ResidualCapas s) (ST s))) [Edge]
-fulkersonDFS goal start = if (traceShowId start) == goal then pure [] else do
-    notVisited <- gets $ S.notMember start . (traceWith (show . S.size ))
+fulkersonDFS :: Vertex -> Vertex ->  MaybeT (StateT (S.Set Vertex) (ReaderT (Graph, ResidualCapas s) (ST s))) [Edge]
+fulkersonDFS goal start = if start == goal then pure [] else do
+    notVisited <- gets $ S.notMember start
     guard notVisited
     modify $ S.insert start
     (graph, weights) <- ask
@@ -68,7 +73,7 @@ fulkersonDFS goal start = if (traceShowId start) == goal then pure [] else do
 
 fordFulkersonM :: Vertex -> Vertex -> MaybeT (ReaderT (Graph, ResidualCapas s) (ST s)) ()
 fordFulkersonM start goal = do
-    dfsPath <- evalStateT (fulkersonDFS goal (traceShow "STARTING" start)) S.empty
+    dfsPath <- MaybeT $ evalStateT (runMaybeT $ fulkersonDFS goal start) S.empty
     capas <- asks snd
     minCap <- maximum <$> mapM (lift . lift . readArray capas) dfsPath
     forM_ dfsPath $ \(u,v) -> do
@@ -87,8 +92,18 @@ runFordFulkerson graph start goal = runST runFord
               void $ runReaderT (runMaybeT $ fordFulkersonM start goal) (graph, capas)
               freeze capas
 
-part1 graph = scc newGraph
-    where capas = traceWith (show . bounds) $ runFordFulkerson graph 1 5
+getSeparator :: Graph -> Vertex -> Vertex -> [Edge]
+getSeparator graph start goal = filter (\(x,y) -> S.member x c1 `xor` S.member y c1) $ edges graph
+    where capas = runFordFulkerson graph start goal
           (_, nVerts) = bounds graph
           newGraph = buildG (1, nVerts) $ [ (x,y) | x <- vertices graph, y <- vertices graph, let cap = capas ! (x,y), cap > 0 ]
-          
+          (c1:_) = (S.fromList . toList) <$> scc newGraph
+
+part1 graph = do
+    sep <- separator
+    let nGraph = buildG (1, nVerts) $ filter (not . (`elem` sep)) $ edges graph
+    pure $ product $ length <$> scc nGraph
+    where (_, nVerts) = bounds graph
+          rolls seed = unfoldr (Just . uniformR (1, nVerts)) $ mkStdGen seed
+          rollList = zip (rolls 12345) (rolls 87103)
+          separator = find ((==6) . length) $ uncurry (getSeparator graph) <$> rollList

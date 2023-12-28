@@ -35,6 +35,7 @@ library
         pqueue,
         mtl,
         union-find,
+        random,
 
 executable aoc2023
     main-is:          Main.hs
