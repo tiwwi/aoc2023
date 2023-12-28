@@ -34,6 +34,7 @@ library
         transformers,
         pqueue,
         mtl,
+        union-find,
 
 executable aoc2023
     main-is:          Main.hs

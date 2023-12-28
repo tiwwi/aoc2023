@@ -9,6 +9,7 @@ module Helpers (
     arrayRows,
     arrayColumns,
     takeUntil,
+    pairs,
 ) where
 
 import qualified Data.Text as T
@@ -17,6 +18,7 @@ import Data.List (isPrefixOf, find)
 import Text.Read (readMaybe)
 import Linear.V2 (V2(V2))
 import Data.Array.IArray
+import Data.List (tails)
 
 readT :: Read a => T.Text -> a
 readT = read . T.unpack
@@ -58,6 +60,9 @@ takeUntil _ [] = []
 takeUntil f (x:xs)
     | f x = [x]
     | otherwise = x:takeUntil f xs
+
+pairs :: [a] -> [(a, a)]
+pairs xs = [ (x,y) | (x:ys) <- tails xs, y <- ys ]
 
 count :: (a -> Bool) -> [a] -> Int
 count f = length . filter f

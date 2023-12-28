@@ -63,10 +63,10 @@ solveDay 25 = Day25.solveFrom
 solveDay _ = error "Unknown Day!"
 
 main :: IO ()
-main = defaultMain tests
+main = putStrLn "WHAT" >> defaultMain tests
 
 testedDays :: [Int]
-testedDays = [23]
+testedDays = [25]
 tests :: TestTree
 tests = testGroup "All Tests" (testDay <$> testedDays)
 
@@ -79,6 +79,8 @@ dayTests 20 = [part1Test 20 "day20_ex11.in" "32000000", part1Test 20 "day20_ex12
 dayTests 21 = [part1Test 21 "day21_ex1.in" "16"]
 dayTests 22 = [part1Test 22 "day22_ex1.in" "5", part2Test 22 "day22_ex1.in" "7"]
 dayTests 23 = [part1Test 23 "day23_ex1.in" "94", part2Test 23 "day23_ex1.in" "154"]
+dayTests 24 = [part1Test 24 "day24_ex1.in" "2", part2Test 24 "day24_ex1.in" "47"]
+dayTests 25 = [part1Test 25 "day25_ex1.in" "2"]
 dayTests _ = error "Unknown Day!"
 
 partTest:: ((String, String) -> String) -> Int -> String -> String -> String -> TestTree
