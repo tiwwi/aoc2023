@@ -90,17 +90,17 @@ graphViaDfs laby goal cur
             
     where (_, V2 hix hiy) = bounds laby
           viableNbs = filter isViable $ (cur+) <$> directions
-          walked = incFst . walkForwards laby goal <$> (cur,) <$> viableNbs
+          walked = incFst . walkForwards laby goal . (cur,) <$> viableNbs
           isViable nb = case laby !? nb of
                             Just (Slope dir) -> nb + dir /= cur
                             Just Empty -> True
                             _ -> False
 
 buildEzGraph :: Laby -> (FakeGraph, Pos, Pos)
-buildEzGraph laby = ((execState (graphViaDfs laby goal start) M.empty) M.! start, start, goal)
+buildEzGraph laby = (execState (graphViaDfs laby goal start) M.empty M.! start, start, goal)
     where (_, V2 xhi yhi) = bounds laby
-          start = fst $ fromJust $ find (\((V2 x y), field) -> field == Empty && x == 1) $ assocs laby
-          goal = fst $ fromJust $ find (\((V2 x y), field) -> field == Empty && x == xhi) $ assocs laby
+          start = fst $ fromJust $ find (\(V2 x y, field) -> field == Empty && x == 1) $ assocs laby
+          goal = fst $ fromJust $ find (\(V2 x y, field) -> field == Empty && x == xhi) $ assocs laby
 
 longestFakePath :: FakeGraph -> Int
 longestFakePath (Goal _ ) = 0
@@ -130,7 +130,7 @@ longestPath graph goal visited cur pathWeight
         let potentialWeight = pathWeight + V.sum [ V.maximum $ V.cons 0 [ w | (w,j) <- edges, S.notMember j visited ] | (i,edges) <- V.indexed graph, S.notMember i withCur ]
         currentMax <- get
         when (potentialWeight > currentMax) $ 
-            V.sequence_ [ longestPath graph goal withCur next (pathWeight + weight) | (weight, next) <- (graph V.! cur), S.notMember next visited ]
+            V.sequence_ [ longestPath graph goal withCur next (pathWeight + weight) | (weight, next) <- graph V.! cur, S.notMember next visited ]
     where withCur = S.insert cur visited
           neighbours v = graph V.! v
 

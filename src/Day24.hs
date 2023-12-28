@@ -47,7 +47,7 @@ stoneMeet (Line pfull vfull) (Line pfull' vfull') = do
         v' = vfull' ^. _xy
         mat = Linear.Matrix.transpose $ V2 v (-v')
     guard $ det22 mat /= 0
-    let (V2 t t') = (inv22 mat) !* (p' - p)
+    let (V2 t t') = inv22 mat !* (p' - p)
     guard $ t > 0 && t' > 0
     return $ p + t *^ v
 
@@ -60,7 +60,7 @@ inAreaT (V2 x y) = checkComponent x && checkComponent y
 
 
 part1 stones = length $ [ pos | pair <- pairs stones, Just pos <- return $ uncurry stoneMeet pair, inArea pos ]
-part2 stones = round $ sum $ result
+part2 stones = round $ sum result
     where [l1, _, l2 , _, l3] = take 5 stones
           subLine (Line a b) (Line c d) = Line (c-a) (d-b)
           l2'@(Line p2' v2') = subLine l2 l1
@@ -70,4 +70,4 @@ part2 stones = round $ sum $ result
           t2 = negate $ dot p2' c3' / dot v2' c3'
           t3 = negate $ dot p3' c2' / dot v3' c2'
           atTime (Line p v) t = p + t*^v
-          result = traceShowId $ atTime l2 t2 + ((t2 - 0)/(t2-t3)) *^ (atTime l3 t3 - atTime l2 t2)
+          result = traceShowId $ atTime l2 t2 + (t2/(t2-t3)) *^ (atTime l3 t3 - atTime l2 t2)

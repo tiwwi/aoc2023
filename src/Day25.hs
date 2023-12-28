@@ -33,7 +33,7 @@ type AdjList = [Int]
 type ResidualCapas s = STUArray s (Vertex, Vertex) Float
 
 solveFrom :: FilePath -> IO (String, String)
-solveFrom = fmap (solve) . T.readFile
+solveFrom = fmap solve . T.readFile
 
 solve :: T.Text -> (String, String)
 solve txt = (show $ part1 graph, "Christmas is saved! ... unless?")
@@ -41,16 +41,16 @@ solve txt = (show $ part1 graph, "Christmas is saved! ... unless?")
           graph = toGraph values
 
 nameP :: Parser Name
-nameP = (mfilter ((==3) . T.length) $ A.takeWhile isLower)
+nameP = mfilter ((==3) . T.length) (A.takeWhile isLower)
 edgeP :: Parser (T.Text, [T.Text])
-edgeP = (,) <$> (nameP) <*> (": " *> sepBy1 nameP " ")
+edgeP = (,) <$> nameP <*> (": " *> sepBy1 nameP " ")
 
 toGraph :: [(T.Text, [T.Text])] -> Graph
 toGraph edges = buildG (1, nVerts) $ do
           (l, r) <- pairs
           let intEdge = (getInt l, getInt r)
           [intEdge, swap intEdge]
-    where pairs = edges >>= (uncurry $ fmap . (,))
+    where pairs = edges >>= uncurry (fmap . (,))
           vertexSet = foldr (\(l, r) s -> S.insert r $ S.insert l s) S.empty pairs
           nVerts = S.size vertexSet
           asInt = M.fromList $ zip (S.toList vertexSet) [1..] :: M.Map T.Text Int
@@ -88,7 +88,7 @@ runFordFulkerson graph start goal = runST runFord
           initialArray :: UArray Edge Float
           initialArray = array ((1,1), (nVerts, nVerts)) ([((ix, iy), 0) | ix <- indices graph, iy <- indices graph] ++ [(e, 1) | e <- edges graph])
           runFord = do
-              capas <- thaw (initialArray)
+              capas <- thaw initialArray
               void $ runReaderT (runMaybeT $ fordFulkersonM start goal) (graph, capas)
               freeze capas
 
@@ -97,7 +97,7 @@ getSeparator graph start goal = filter (\(x,y) -> S.member x c1 `xor` S.member y
     where capas = runFordFulkerson graph start goal
           (_, nVerts) = bounds graph
           newGraph = buildG (1, nVerts) $ [ (x,y) | x <- vertices graph, y <- vertices graph, let cap = capas ! (x,y), cap > 0 ]
-          (c1:_) = (S.fromList . toList) <$> scc newGraph
+          (c1:_) = S.fromList . toList <$> scc newGraph
 
 part1 graph = do
     sep <- separator

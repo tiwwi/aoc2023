@@ -37,7 +37,7 @@ solve txt = (show $ part1 results, show $ sum results)
 
 v3P :: A.Parser (V3 Int)
 v3P = do
-    [x,y,z] <- A.decimal `A.sepBy1` (A.char ',')
+    [x,y,z] <- A.decimal `A.sepBy1` A.char ','
     pure $ V3 x y z
 
 brickP :: A.Parser (Int -> Brick)
@@ -55,7 +55,7 @@ brickHeight (Brick (V3 _ _ loh) (V3 _ _ hih) _) = 1 + hih - loh
 stackBrick :: Tower s -> S.Set Brick -> Brick -> ST s (S.Set Brick)
 stackBrick tower dropped brick = do
     let brickIndices = expand2D brick
-    bricksBelow <- mapM (fmap head . readArray tower) $ brickIndices
+    bricksBelow <- mapM (fmap head . readArray tower) brickIndices
     let maxHeight = maximum $ fst <$> bricksBelow
         brickH = brickHeight brick
         droppedHeight = maxHeight + brickH
@@ -69,21 +69,21 @@ runBricks bds@(V2 minx miny, V2 maxx maxy) bricks = do
     let defaultBrick = Brick (V3 minx miny 0) (V3 maxx maxy 0) 0
     let sortedBricks = sortOnZ bricks
     tower <- newArray bds [(0, defaultBrick)]
-    foldM (stackBrick tower) (S.empty) sortedBricks
+    foldM (stackBrick tower) S.empty sortedBricks
 
 dropBricks :: [Brick] -> S.Set Brick
 dropBricks bricks = runST (runBricks bds bricks)
-    where minx = minimum $ (view $ lo._x) <$> bricks
-          miny = minimum $ (view $ lo._y) <$> bricks
-          maxx = maximum $ (view $ hi._x) <$> bricks
-          maxy = maximum $ (view $ hi._y) <$> bricks
+    where minx = minimum $ view (lo._x) <$> bricks
+          miny = minimum $ view (lo._y) <$> bricks
+          maxx = maximum $ view (hi._x) <$> bricks
+          maxy = maximum $ view (hi._y) <$> bricks
           bds = (V2 minx miny, V2 maxx maxy)
 
 sortOnZ :: [Brick] -> [Brick]
 sortOnZ = sortOn (view $ lo._z)
 
 dropEach :: S.Set Brick -> [Int]
-dropEach dropped = dropAfterDelete <$> (S.toList dropped)
+dropEach dropped = dropAfterDelete <$> S.toList dropped
     where droppedSort = sortOnZ (S.toList dropped)
           dropAfterDelete :: Brick -> Int
           dropAfterDelete brick = S.size $ S.difference (dropBricks $ sortOnZ $ filter (/= brick) droppedSort) dropped
