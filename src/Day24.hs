@@ -15,13 +15,7 @@ import Linear.Vector
 import Control.Monad
 import Control.Lens
 
-import Data.List(scanl')
-import Debug.Trace
-
-
 data Line = Line {_p :: V3 Double, _d :: V3 Double} deriving (Show)
-
-makeLenses ''Line
 
 solveFrom :: FilePath -> IO (String, String)
 solveFrom = fmap solve . T.readFile
@@ -36,8 +30,6 @@ hailstoneP = do
     void $ A.skipSpace >> "@" >> A.skipSpace
     [vx,vy,vz] <- A.sepBy1 (fromIntegral <$> A.signed A.decimal) ("," >> A.skipSpace)
     return $ Line (V3 px py pz) (V3 vx vy vz)
--- p + tv = p' + t'v'
--- tv - t'v' = p'-p
 
 stoneMeet :: Line -> Line -> Maybe (V2 Double)
 stoneMeet (Line pfull vfull) (Line pfull' vfull') = do
@@ -54,10 +46,6 @@ stoneMeet (Line pfull vfull) (Line pfull' vfull') = do
 inArea :: V2 Double -> Bool
 inArea (V2 x y) = checkComponent x && checkComponent y
     where checkComponent c = 200000000000000 <= c && c <= 400000000000000
-inAreaT :: V2 Double -> Bool
-inAreaT (V2 x y) = checkComponent x && checkComponent y
-    where checkComponent c = 7 <= c && c <= 27
-
 
 part1 stones = length $ [ pos | pair <- pairs stones, Just pos <- return $ uncurry stoneMeet pair, inArea pos ]
 part2 stones = round $ sum result
@@ -70,4 +58,4 @@ part2 stones = round $ sum result
           t2 = negate $ dot p2' c3' / dot v2' c3'
           t3 = negate $ dot p3' c2' / dot v3' c2'
           atTime (Line p v) t = p + t*^v
-          result = traceShowId $ atTime l2 t2 + (t2/(t2-t3)) *^ (atTime l3 t3 - atTime l2 t2)
+          result = atTime l2 t2 + (t2/(t2-t3)) *^ (atTime l3 t3 - atTime l2 t2)

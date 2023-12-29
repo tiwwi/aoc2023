@@ -10,6 +10,7 @@ extra-doc-files: CHANGELOG.md
 
 library
     exposed-modules:
+        AOCFiles,
         Day01, Day02, Day03, Day04, Day05,
         Day06, Day07, Day08, Day09, Day10,
         Day11, Day12, Day13, Day14, Day15,
@@ -36,9 +37,13 @@ library
         mtl,
         union-find,
         random,
+        directory,
+        bytestring,
+        http-conduit,
 
 executable aoc2023
     main-is:          Main.hs
+    other-modules: 
     hs-source-dirs:   app
     default-language: GHC2021
     ghc-options:      -Wall

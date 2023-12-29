@@ -19,7 +19,6 @@ import Control.Monad.Trans.Maybe
 import Control.Monad.ST
 
 import Data.Maybe
-import Debug.Trace
 
 type Pos = V2 Int
 type Garden = UArray Pos Bool
@@ -97,16 +96,14 @@ part1 :: BFSResults -> Int -> Int
 part1 results nsteps = length $ filter (\n -> n >= 0 && n <= nsteps && n `mod` 2 == nsteps `mod` 2) $ elems results
 
 part2 :: BFSResults -> Int -> Int
-part2 results nsteps = trace nothin $ n^2 * nAllEven - n*nOutsideEven + (n-1)^2 * nAllOdd + (n-1) * nOutsideOdd
-    where n = traceShowId $ (1 + ((nsteps - 65) `div` 131))
+part2 results nsteps = n^2 * nAllEven - n*nOutsideEven + (n-1)^2 * nAllOdd + (n-1) * nOutsideOdd
+    where n = (1 + ((nsteps - 65) `div` 131))
           allPoints = filter ((>= 0) . snd) $ assocs results
           allEvenPoints = filter ((== mod nsteps 2) . (`mod` 2) . snd) $ allPoints
           allOddPoints = filter ((/= mod nsteps 2) . (`mod` 2) . snd) $ allPoints
           outsideOddPoints =  [()| (V2 p1 p2, i) <- allOddPoints, abs (p1 - 65) + abs (p2 - 65) > 65]
-          --outsideOddPoints =  filter ((> 65) . snd) allOddPoints
           outsideEvenPoints = filter ((> 65) . snd) allEvenPoints
           nAllEven = length $ allEvenPoints
           nAllOdd = length $ allOddPoints 
           nOutsideEven = length $ outsideEvenPoints
           nOutsideOdd= length $ outsideOddPoints
-          nothin = unlines ["nAllEven: " ++ show nAllEven, "nAllOdd: " ++ show nAllOdd, "nOutsideEven: " ++ show nOutsideEven, "nOutsideOdd: " ++ show nOutsideOdd]

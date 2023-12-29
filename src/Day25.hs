@@ -9,8 +9,6 @@ import Helpers
 import Data.Char (isLower)
 import qualified Data.Set as S
 import qualified Data.Map as M
-import Debug.Trace
-
 
 import Control.Monad
 import Control.Monad.State
@@ -29,7 +27,6 @@ import Data.Array.Unboxed
 import Data.Array.ST
 
 type Name = T.Text
-type AdjList = [Int]
 type ResidualCapas s = STUArray s (Vertex, Vertex) Float
 
 solveFrom :: FilePath -> IO (String, String)

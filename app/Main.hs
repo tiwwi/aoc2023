@@ -6,6 +6,8 @@ import Text.Printf (printf)
 import Data.Time.Clock
 import Control.DeepSeq (deepseq)
 
+import AOCFiles
+
 import qualified Day01 (solveFrom)
 import qualified Day02 (solveFrom)
 import qualified Day03 (solveFrom)
@@ -63,12 +65,12 @@ solveDay 24 = Day24.solveFrom $ inputFile 24
 solveDay 25 = Day25.solveFrom $ inputFile 25
 solveDay _ = error "Unknown Day!"
 
-
 displayDay :: Int -> NominalDiffTime -> (String, String) -> String
 displayDay n time (x, y) = printf "=== Day %02d ===\nPart 1: %s\nPart 2: %s\nTime: %s\n" n x y (show time)
 
 runDay :: Int -> IO String
 runDay n = do
+    getAOCInput (inputFile n) n
     start <- getCurrentTime
     result <- solveDay n
     deepseq result $ return () 
